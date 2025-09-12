@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:id_verification_app/videoToText.dart';
 
 import 'faceDetection.dart';
-import 'face_detection.dart';
 Future<void> main() async {
   final cameras = await availableCameras();
   runApp(MaterialApp(
@@ -19,4 +18,6 @@ Future<void> main() async {
     ),
   ));
 }
+
+
 
