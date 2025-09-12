@@ -46,6 +46,7 @@ dependencies:
   google_ml_kit: ^0.20.0
   video_thumbnail:
   video_player:
+  http:  
   #ffmpeg_kit_flutter_min:
   path:
   string_similarity:
