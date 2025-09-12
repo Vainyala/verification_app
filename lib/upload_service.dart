@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class UploadService {
-  static const String baseUrl = "http://192.168.0.106:5000"; // or localhost if emulator
+  // static const String baseUrl = "http://192.168.0.106:5000"; // or localhost if emulator
+  static const String baseUrl = "https://259f74902f0a.ngrok-free.app";
 
   static Future<bool> uploadImage(File imageFile, String userId) async {
     try {
