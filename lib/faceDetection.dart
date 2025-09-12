@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:id_verification_app/upload_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -355,12 +356,26 @@ class _FaceDetectionScreenState extends State<FaceDetectionScreen> {
       _cameraController?.stopImageStream();
     } catch (_) {}
 
-    // ONLY NEW ADDITION: Capture image after verification
+    // Capture image
     await _captureImage();
 
-    // OPTIMIZED: Show success immediately
+    if (_capturedImage != null) {
+      // ✅ Upload captured image
+      final success = await UploadService.uploadImage(
+        File(_capturedImage!.path),
+        "user123", // you can replace with actual logged in userId
+      );
+
+      if (success) {
+        print("✅ Image uploaded successfully");
+      } else {
+        print("❌ Image upload failed");
+      }
+    }
+
     Timer(Duration(milliseconds: 500), () => _showSuccessDialog());
   }
+
 
   void _showSuccessDialog() {
     debugPrint("🔵 Showing success dialog. _capturedImage is ${_capturedImage != null ? 'NOT NULL' : 'NULL'}");
