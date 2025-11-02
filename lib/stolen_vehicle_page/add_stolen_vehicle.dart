@@ -37,6 +37,28 @@ class _StolenVehiclePageState extends State<StolenVehiclePage> {
     _matchService.init();
     VehicleDb.init();
     _speech = stt.SpeechToText();
+    _regNoController.addListener(_formatVehicleNumber);
+  }
+
+  void _formatVehicleNumber() {
+    String text = _regNoController.text.toUpperCase().replaceAll(' ', '');
+    String formatted = '';
+
+    // Insert space after 2, 4, and 6 characters
+    for (int i = 0; i < text.length; i++) {
+      formatted += text[i];
+      if (i == 1 || i == 3 || i == 5) {
+        formatted += ' ';
+      }
+    }
+
+    // Prevent cursor jump
+    if (formatted != _regNoController.text) {
+      _regNoController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
   }
 
   Future<void> _pickImage(bool isSuspect) async {
@@ -154,71 +176,178 @@ class _StolenVehiclePageState extends State<StolenVehiclePage> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF0A1F44);
-
     return Scaffold(
-      backgroundColor: primaryColor,
-      appBar: AppBar(
-        title: const Text(
-          "Add Stolen Vehicle Details",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1A237E), Color(0xFF3949AB)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: primaryColor,
-        elevation: 5,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Text(
+                      'Add Stolen Vehicle',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Form Content
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF5F7FA),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Vehicle Image",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A237E),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildModernImagePicker(_suspectImage),
+                        const SizedBox(height: 24),
+                        _buildModernTextField(
+                          controller: _regNoController,
+                          label: "Registration Number",
+                          icon: Icons.confirmation_number,
+                          hint: "e.g., SH 12 HJ 1234",
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernTextField(
+                          controller: _vehicleTypeController,
+                          label: "Vehicle Type",
+                          icon: Icons.directions_car,
+                          hint: "e.g., Sedan, SUV, Bike",
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernVoiceTextField(
+                          controller: _noteController,
+                          label: "Additional Notes",
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: _isSaving ? null : _saveToDatabase,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4CAF50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isSaving
+                                ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.save_outlined, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Save Vehicle Data",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildModernImagePicker(File? imageFile) {
+    return GestureDetector(
+      onTap: () => _pickImage(true),
+      child: Container(
+        height: 200,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey[300]!, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: imageFile != null
+            ? ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Image.file(imageFile, fit: BoxFit.cover),
+        )
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A237E).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_a_photo_outlined,
+                color: Color(0xFF1A237E),
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 12),
             const Text(
-              "Add Vehicle Image",
+              "Tap to add vehicle image",
               style: TextStyle(
-                  color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildImagePicker(_suspectImage, true),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _regNoController,
-              label: "Registration No.",
-              icon: Icons.confirmation_number,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _vehicleTypeController,
-              label: "Vehicle Type",
-              icon: Icons.directions_car,
-            ),
-            const SizedBox(height: 20),
-            _buildVoiceTextField(
-              controller: _noteController,
-              label: "Short Note",
-            ),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton.icon(
-                onPressed: _isSaving ? null : _saveToDatabase,
-                icon: _isSaving
-                    ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child:
-                  CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
-                    : const Icon(Icons.save, color: Colors.white),
-                label: Text(
-                  _isSaving ? "Saving..." : "Save Vehicle Data",
-                  style: const TextStyle(fontSize: 18, color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent.shade400,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
+                color: Color(0xFF1A237E),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -227,103 +356,206 @@ class _StolenVehiclePageState extends State<StolenVehiclePage> {
     );
   }
 
-  Widget _buildImagePicker(File? imageFile, bool isSuspect) {
-    return GestureDetector(
-      onTap: () => _pickImage(isSuspect),
-      child: Container(
-        height: 150,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white30),
-        ),
-        child: imageFile != null
-            ? ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(imageFile, fit: BoxFit.cover, width: double.infinity),
-        )
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.camera_alt, color: Colors.white70, size: 40),
-            SizedBox(height: 10),
-            Text(
-              "Tap to select image",
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
+  Widget _buildModernTextField({
     required TextEditingController controller,
     required String label,
-    IconData? icon,
+    required IconData icon,
+    String? hint,
   }) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.white70),
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white30),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white30),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white, width: 1.5),
-        ),
-      ),
-    );
-  }
-
-  // 🔹 Voice-enabled Short Note with visual mic state
-  Widget _buildVoiceTextField({
-    required TextEditingController controller,
-    required String label,
-  }) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      maxLines: 2,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        suffixIcon: IconButton(
-          icon: Icon(
-            Icons.mic,
-            color: _isListening ? Colors.redAccent : Colors.white70, // 🔴 mic on
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A237E),
           ),
-          onPressed: () => _startListening(controller),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white30),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(fontSize: 16),
+            decoration: InputDecoration(
+              hintText: hint,
+              prefixIcon: Icon(icon, color: const Color(0xFF1A237E)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white30),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.white, width: 1.5),
-        ),
-      ),
+      ],
     );
   }
+
+  Widget _buildModernVoiceTextField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A237E),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            maxLines: 3,
+            style: const TextStyle(fontSize: 16),
+            decoration: InputDecoration(
+              hintText: "Add any additional information...",
+              suffixIcon: IconButton(
+                icon: Icon(
+                  Icons.mic,
+                  color: _isListening ? Colors.red : const Color(0xFF1A237E),
+                ),
+                onPressed: () => _startListening(controller),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Widget _buildImagePicker(File? imageFile, bool isSuspect) {
+  //   return GestureDetector(
+  //     onTap: () => _pickImage(isSuspect),
+  //     child: Container(
+  //       height: 150,
+  //       width: double.infinity,
+  //       decoration: BoxDecoration(
+  //         color: Colors.white.withOpacity(0.1),
+  //         borderRadius: BorderRadius.circular(12),
+  //         border: Border.all(color: Colors.white30),
+  //       ),
+  //       child: imageFile != null
+  //           ? ClipRRect(
+  //         borderRadius: BorderRadius.circular(12),
+  //         child: Image.file(imageFile, fit: BoxFit.cover, width: double.infinity),
+  //       )
+  //           : Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: const [
+  //           Icon(Icons.camera_alt, color: Colors.white70, size: 40),
+  //           SizedBox(height: 10),
+  //           Text(
+  //             "Tap to select image",
+  //             style: TextStyle(color: Colors.white70),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // Widget _buildTextField({
+  //   required TextEditingController controller,
+  //   required String label,
+  //   IconData? icon,
+  // }) {
+  //   return TextField(
+  //     controller: controller,
+  //     style: const TextStyle(color: Colors.white),
+  //     decoration: InputDecoration(
+  //       prefixIcon: Icon(icon, color: Colors.white70),
+  //       labelText: label,
+  //       labelStyle: const TextStyle(color: Colors.white70),
+  //       filled: true,
+  //       fillColor: Colors.white.withOpacity(0.1),
+  //       border: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white30),
+  //       ),
+  //       enabledBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white30),
+  //       ),
+  //       focusedBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white, width: 1.5),
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // // 🔹 Voice-enabled Short Note with visual mic state
+  // Widget _buildVoiceTextField({
+  //   required TextEditingController controller,
+  //   required String label,
+  // }) {
+  //   return TextField(
+  //     controller: controller,
+  //     style: const TextStyle(color: Colors.white),
+  //     maxLines: 2,
+  //     decoration: InputDecoration(
+  //       labelText: label,
+  //       labelStyle: const TextStyle(color: Colors.white70),
+  //       filled: true,
+  //       fillColor: Colors.white.withOpacity(0.1),
+  //       suffixIcon: IconButton(
+  //         icon: Icon(
+  //           Icons.mic,
+  //           color: _isListening ? Colors.redAccent : Colors.white70, // 🔴 mic on
+  //         ),
+  //         onPressed: () => _startListening(controller),
+  //       ),
+  //       border: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white30),
+  //       ),
+  //       enabledBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white30),
+  //       ),
+  //       focusedBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //         borderSide: const BorderSide(color: Colors.white, width: 1.5),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _startListening(TextEditingController controller) async {
     bool available = await _speech.initialize();
@@ -357,6 +589,8 @@ class _StolenVehiclePageState extends State<StolenVehiclePage> {
     _regNoController.dispose();
     _vehicleTypeController.dispose();
     _noteController.dispose();
+    _regNoController.removeListener(_formatVehicleNumber);
+    _regNoController.dispose();
     super.dispose();
   }
 }
