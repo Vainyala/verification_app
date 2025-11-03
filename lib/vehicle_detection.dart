@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:id_verification_app/geofence_setup.dart';
 import 'package:id_verification_app/stolen_vehicle_page/capture_stolen_vehicle.dart';
 import 'package:id_verification_app/view_saved_vehicle.dart';
 import 'stolen_vehicle_page/add_stolen_vehicle.dart';
@@ -54,7 +55,7 @@ class VehicleDetectionScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Stolen Vehicle Management',
+                            'Vehicle Management',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 14,
@@ -74,8 +75,8 @@ class VehicleDetectionScreen extends StatelessWidget {
                       _buildModernCard(
                         context: context,
                         icon: Icons.add_circle_outline,
-                        title: "Add Stolen Vehicle",
-                        subtitle: "Register new stolen vehicle details",
+                        title: "Add Vehicle",
+                        subtitle: "Register vehicle details",
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
                         ),
@@ -92,7 +93,7 @@ class VehicleDetectionScreen extends StatelessWidget {
                       _buildModernCard(
                         context: context,
                         icon: Icons.camera_alt_outlined,
-                        title: "Detect Stolen Vehicle",
+                        title: "Detect Vehicle",
                         subtitle: "Capture and scan vehicle plates",
                         gradient: const LinearGradient(
                           colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
@@ -120,6 +121,24 @@ class VehicleDetectionScreen extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => const ViewSavedVehiclesPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      _buildModernCard(
+                        context: context,
+                        icon: Icons.location_on,
+                        title: "Add Geofence",
+                        subtitle: "To add Live Location",
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFD726DD), Color(0xFFDC51AD)],
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const GeofenceSetupScreen(),
                             ),
                           );
                         },
