@@ -10,11 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:id_verification_app/imageToText.dart';
 
 import 'package:id_verification_app/main.dart';
+import 'package:id_verification_app/vehicle_detection.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(VerifyDocScreen());
+    await tester.pumpWidget(VehicleDetectionScreen());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
