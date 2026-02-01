@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  permission_handler: 
   file_picker: ^10.2.0
   google_mlkit_text_recognition: ^0.15.0
   google_mlkit_face_detection: ^0.13.1
